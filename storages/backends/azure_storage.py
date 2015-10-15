@@ -8,6 +8,8 @@ from storages.compat import Storage
 try:
     import azure
     import azure.storage
+    import azure.storage.blob
+    import azure.common
 except ImportError:
     raise ImproperlyConfigured(
         "Could not load Azure bindings. "
@@ -32,7 +34,7 @@ class AzureStorage(Storage):
     @property
     def connection(self):
         if self._connection is None:
-            self._connection = azure.storage.BlobService(
+            self._connection = azure.storage.blob.blobservice.BlobService(
                 self.account_name, self.account_key)
         return self._connection
 
@@ -44,7 +46,7 @@ class AzureStorage(Storage):
         try:
             self.connection.get_blob_properties(
                 self.azure_container, name)
-        except azure.WindowsAzureMissingResourceError:
+        except azure.common.AzureMissingResourceHttpError:
             return False
         else:
             return True
